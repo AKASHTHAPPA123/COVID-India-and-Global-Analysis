@@ -141,8 +141,8 @@ ORDER BY 1,2
 
 
 --Number of people get infected per day from the virus vs Deaths per day
-SELECT date, SUM(new_cases)  newcases_per_day,SUM(CAST(new_deaths as int)) deaths_per_day,
-SUM(CAST(new_deaths as int))/SUM(new_cases)* 100 death_percentage
+SELECT date, SUM(new_cases) as [newcases per day],SUM(CAST(new_deaths as int)) [deaths per day],
+SUM(CAST(new_deaths as int))/SUM(new_cases)* 100 [death percentage]
 FROM portfolio_project..CovidDeaths 
 WHERE new_deaths is not NULL
 GROUP BY date
@@ -167,17 +167,64 @@ join portfolio_project..CovidVaccination vac
 order by 2,3
 
 
- --sum no. of people getting vaccination everyday
+--no. of people getting vaccination everyday
 select	deaths.date, 
 		deaths.continent, 
 		deaths.location,
 		deaths.population, 
-		isnull(vac.new_vaccinations,0), 
+		isnull(vac.new_vaccinations,0) as [Vaccinations per day], 
 		sum(cast(isnull(vac.new_vaccinations,0) as bigint))
-				over (partition by deaths.location order by deaths.date,deaths.location) as count_of_vaccinated_people
+				over (partition by deaths.location order by deaths.date,deaths.location) as [count of vaccinated people]
 from portfolio_project..CovidDeaths deaths
 join portfolio_project..CovidVaccination vac
 	on deaths.location = vac.location
 	and deaths.date = vac.date
 where deaths.continent is not null
 order by 2,3
+
+--use CTE
+with PopvsVac (date , continent, location , population, vaccinations, [count of vaccinated people])
+as(
+select	deaths.date, 
+		deaths.continent, 
+		deaths.location,
+		deaths.population, 
+		isnull(vac.new_vaccinations,0) as [Vaccinations per day], 
+		sum(cast(isnull(vac.new_vaccinations,0) as bigint))
+				over (partition by deaths.location order by deaths.date,deaths.location) as [count of vaccinated people]
+from portfolio_project..CovidDeaths deaths
+join portfolio_project..CovidVaccination vac
+	on deaths.location = vac.location
+	and deaths.date = vac.date
+where deaths.continent is not null
+)
+select location, population, vaccinations,[count of vaccinated people], ([count of vaccinated people]/population)*100 as [Vaccinated population]
+from PopvsVac;
+
+--TEMP table
+
+create table #percentage_populatin_vaccinated(
+continent nvarchar(255),
+location nvarchar(255),
+date datetime,
+population numeric,
+vaccinations numeric,
+total_vaccinations numeric
+)
+
+insert into #percentage_populatin_vaccinated
+select	deaths.date, 
+		deaths.continent, 
+		deaths.location,
+		deaths.population, 
+		isnull(vac.new_vaccinations,0) as [Vaccinations per day], 
+		sum(cast(isnull(vac.new_vaccinations,0) as bigint))
+				over (partition by deaths.location order by deaths.date,deaths.location) as [count of vaccinated people]
+from portfolio_project..CovidDeaths deaths
+join portfolio_project..CovidVaccination vac
+	on deaths.location = vac.location
+	and deaths.date = vac.date
+where deaths.continent is not null
+
+
+
