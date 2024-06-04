@@ -62,7 +62,7 @@ WHERE new_deaths is not NULL
 GROUP BY date
 ORDER BY 1,2
 ```
-![cases vs deaths](results/Deaths per day.png)
+![cases vs deaths](results/Deaths.png)
 
 
 
