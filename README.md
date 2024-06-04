@@ -39,6 +39,7 @@ WHERE continent IS not NULL
 GROUP BY continent
 ORDER BY HighestDeathRate DESC
 ```
+![deaths in each continent](results/continent.png)
 
 2. Percentage of the total population in each country infected with the virus
 ```sql
@@ -49,8 +50,10 @@ WHERE continent IS NOT NULL
 GROUP BY location, population
 ORDER BY HighestInfectionPercentage DESC
 ```
+![infection rate](results/infected.png)
 
-3.-Number of people get infected per day from the virus vs Deaths per day
+
+3. Number of people get infected per day from the virus vs Deaths per day
 ```sql
 SELECT date, SUM(new_cases) as [newcases per day],SUM(CAST(new_deaths as int)) [deaths per day],
 SUM(CAST(new_deaths as int))/SUM(new_cases)* 100 [death percentage]
@@ -59,8 +62,8 @@ WHERE new_deaths is not NULL
 GROUP BY date
 ORDER BY 1,2
 ```
+![cases vs deaths](results/Deaths per day.png)
 
-![Example Photo](example.jpg)
 
 
 4. Nmber of people getting vaccination everyday
@@ -83,6 +86,6 @@ where deaths.continent is not null
 select location, population, vaccinations,[count of vaccinated people], ([count of vaccinated people]/population)*100 as [Vaccinated population]
 from PopvsVac;
 ```
-
+![Vaccination done](results/vaccination.png)
 
 
